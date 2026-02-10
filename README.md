@@ -12,13 +12,13 @@ Repositório pronto para instalação com `npx skills`.
 Depois de publicar este repositório no GitHub:
 
 ```bash
-npx skills add <owner>/<repo>
+npx skills add Jpkovas/code-audit-readonly
 ```
 
 Para instalar direto sem prompt interativo:
 
 ```bash
-npx skills add <owner>/<repo> --skill code-audit-readonly -y
+npx skills add Jpkovas/code-audit-readonly --skill code-audit-readonly -y
 ```
 
 ## Verificação rápida
@@ -26,5 +26,5 @@ npx skills add <owner>/<repo> --skill code-audit-readonly -y
 Listar skills disponíveis no repositório:
 
 ```bash
-npx skills add <owner>/<repo> --list
+npx skills add Jpkovas/code-audit-readonly --list
 ```

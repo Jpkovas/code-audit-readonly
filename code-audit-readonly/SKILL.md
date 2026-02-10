@@ -14,6 +14,10 @@ Run a full technical repository audit in read-only mode and record everything in
 3. Do not run automatic refactors, formatters that write to disk, or destructive commands.
 4. Allow only the creation/update of `improvements.md` as the final audit output.
 5. Do not ask for confirmation to proceed with the audit; execute the plan end to end.
+6. Record every validated finding; do not impose arbitrary limits.
+7. If multiple locations share the same issue pattern, still register every location with explicit file and line references.
+8. This audit is intentionally slow: prioritize depth, evidence quality, and completeness over speed.
+9. Do not optimize for fast turnaround if that reduces analysis coverage or confidence.
 
 ## Mandatory analysis scope
 
@@ -63,17 +67,91 @@ Run a full technical repository audit in read-only mode and record everything in
    2. Record specific findings and correlate with related imports/calls/contracts.
    3. Update progress tracking.
    4. Explicitly record: `File fully reviewed: <path/to/file>`.
+   5. Before moving to the next file, run a quick self-check for missed edge cases, security vectors, and cross-file impacts.
 4. Run read-only auxiliary checks when useful:
    1. Static analysis, linter, and typecheck in read-only mode.
    2. Run tests without writing to disk.
    3. Dependency/CVE audit.
 5. Close `improvements.md` with:
-   1. Top 10 risks (prioritize security and correctness).
-   2. Top 10 performance gains (highest cost-benefit).
-   3. Suggested phased plan:
-      1. Phase 1: critical.
-      2. Phase 2: high.
-      3. Phase 3: refinement.
+   1. A complete finding inventory (all findings captured during the audit).
+   2. A prioritized backlog that references finding IDs and contains no artificial cap.
+   3. A detailed phased remediation plan (see "Detailed planning requirements").
+   4. A brief completeness checkpoint describing what was verified to ensure no relevant area was rushed or skipped.
+
+## Progress tracking
+
+Apply these rules to keep progress tracking clear and stable:
+
+1. Build a canonical file list once:
+   1. Normalize paths (`./` removed, no trailing slash, consistent case as seen on disk).
+   2. Sort the list before writing "Progress Tracking".
+2. Keep exactly one progress row per canonical file path.
+3. Update progress in-place:
+   1. Change the existing row status (`pending` -> `in_progress` -> `reviewed`).
+   2. Never append a second row for the same file.
+4. Write `File fully reviewed: <path/to/file>` exactly once per file.
+5. If a file is revisited, add notes under the same file entry; do not create a new checklist row or a second `File fully reviewed` line.
+6. Before finishing, validate:
+   1. Number of `reviewed` rows == number of unique relevant files.
+   2. "Progress Tracking" appears exactly once in the report.
+   3. Every finding location appears in at least one reviewed file entry.
+
+## Example report structure
+
+Use this high-level structure to keep the report consistent and to ensure a single "Progress Tracking" section:
+
+```markdown
+# improvements.md
+
+## 1. System summary
+- Inferred architecture and main modules.
+- Main risk surfaces.
+
+## 2. Conventions
+- Categories and severity scale used in the audit.
+- Finding ID convention (`A001`, `A002`, ...).
+
+## 3. Progress Tracking
+- [ ] path/to/file-a.ext
+- [ ] path/to/file-b.ext
+- [ ] path/to/file-c.ext
+
+File fully reviewed: path/to/file-a.ext
+File fully reviewed: path/to/file-b.ext
+File fully reviewed: path/to/file-c.ext
+
+## 4. Complete finding inventory
+### A001
+Category: ...
+Severity: ...
+Location: ...
+Problem: ...
+Impact: ...
+Suggestion: ...
+Correlation notes: ...
+Security (if applicable): ...
+
+### A002
+...
+
+## 5. Prioritized backlog (all findings)
+- Priority 1: A00X, A00Y...
+- Priority 2: A00Z...
+
+## 6. Detailed phased remediation plan
+### Phase 1
+- Objective
+- Findings included
+- Dependencies
+- Validation gates
+- Exit criteria
+
+### Phase 2
+...
+
+### Phase 3
+...
+```
 
 ## Categories and severity
 
@@ -111,11 +189,38 @@ Correlation notes: <related files/flows>
 Security (if applicable): <plausible abuse scenario + mitigation>
 ```
 
+## Detailed planning requirements
+
+The planning phase in `improvements.md` must be explicit and implementation-oriented. Use this structure:
+
+1. Planning assumptions and constraints:
+   1. Confirm read-only audit boundaries.
+   2. List unknowns that may affect remediation sequencing.
+2. Prioritized backlog (complete):
+   1. Include all findings (`A001...A0XX`) with:
+      1. Priority order.
+      2. Estimated effort (`S`, `M`, `L`) with a short rationale.
+      3. Primary risk type (`Correctness`, `Security`, `Performance`, `Reliability`, `Maintainability`).
+3. Phase plan with objective and controls:
+   1. For each phase, include:
+      1. Objective.
+      2. Findings included (explicit ID list).
+      3. Dependencies and ordering constraints.
+      4. Validation gates (tests/checks/evidence expected after fixes).
+      5. Exit criteria (what must be true to close the phase).
+4. Sequencing rules:
+   1. Resolve `Critical` and exploitable `High` security/correctness findings first.
+   2. Schedule performance and maintainability work after risk containment unless blocking.
+   3. Call out parallelizable workstreams and non-parallelizable bottlenecks.
+5. Delivery roadmap:
+   1. Provide a suggested execution order by batch/wave.
+   2. For each batch, list expected risk reduction and verification focus.
+
 ## Traceability requirements
 
 1. Make every finding traceable to file and line/section.
 2. Avoid generic recommendations without evidence.
-3. Prefer precision over volume; do not omit critical findings.
+3. Register all validated findings found during the audit, including low-severity and repeated-location findings.
 4. Explicitly record uncertainties when evidence is partial.
 
 ## Completion criteria
@@ -123,5 +228,5 @@ Security (if applicable): <plausible abuse scenario + mitigation>
 Finish only when:
 1. All relevant files are marked as reviewed in Progress Tracking.
 2. Each reviewed file has the line `File fully reviewed: ...`.
-3. `improvements.md` contains prioritized findings, top 10 risks, top 10 gains, and a phased plan.
+3. `improvements.md` contains the complete finding inventory, a prioritized backlog, and a detailed phased plan.
 4. The audited project remains intact, with only `improvements.md` as the audit output artifact.

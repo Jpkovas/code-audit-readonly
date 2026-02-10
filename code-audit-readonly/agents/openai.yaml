@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Audit Readonly"
   short_description: "Deep repository audit in strict read-only mode"
-  default_prompt: "Use $code-audit-readonly to audit this repository file-by-file and produce improvements.md with traceable, prioritized findings."
+  default_prompt: "Use $code-audit-readonly to audit this repository file-by-file and produce improvements.md with traceable, prioritized findings and a single Progress Tracking section. This task is intentionally slow: prioritize thoroughness, coverage, and evidence quality over speed."

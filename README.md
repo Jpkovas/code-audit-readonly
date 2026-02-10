@@ -1,29 +1,29 @@
 # code-audit-readonly skill repo
 
-Repositório pronto para instalação com `npx skills`.
+Repository ready for installation with `npx skills`.
 
-## Estrutura
+## Structure
 
 - `code-audit-readonly/SKILL.md`
 - `code-audit-readonly/agents/openai.yaml`
 
-## Instalação via npx skills
+## Installation via npx skills
 
-Depois de publicar este repositório no GitHub:
+After publishing this repository to GitHub:
 
 ```bash
 npx skills add Jpkovas/code-audit-readonly
 ```
 
-Para instalar direto sem prompt interativo:
+To install directly without an interactive prompt:
 
 ```bash
 npx skills add Jpkovas/code-audit-readonly --skill code-audit-readonly -y
 ```
 
-## Verificação rápida
+## Quick verification
 
-Listar skills disponíveis no repositório:
+List skills available in the repository:
 
 ```bash
 npx skills add Jpkovas/code-audit-readonly --list

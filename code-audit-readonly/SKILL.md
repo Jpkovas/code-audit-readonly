@@ -116,10 +116,6 @@ Use this high-level structure to keep the report consistent and to ensure a sing
 - [ ] path/to/file-b.ext
 - [ ] path/to/file-c.ext
 
-File fully reviewed: path/to/file-a.ext
-File fully reviewed: path/to/file-b.ext
-File fully reviewed: path/to/file-c.ext
-
 ## 4. Complete finding inventory
 ### A001
 Category: ...

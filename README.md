@@ -1,4 +1,4 @@
-# code-audit-readonly skill repo
+# code-audit-readonly skill
 
 Repository ready for installation with `npx skills`.
 

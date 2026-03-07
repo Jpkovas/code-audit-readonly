@@ -18,6 +18,20 @@ Run a full technical repository audit in read-only mode and record everything in
 7. If multiple locations share the same issue pattern, still register every location with explicit file and line references.
 8. This audit is intentionally slow: prioritize depth, evidence quality, and completeness over speed.
 9. Do not optimize for fast turnaround if that reduces analysis coverage or confidence.
+10. Never reproduce secrets or raw credential material in `improvements.md`, tool output, or final responses.
+11. For secret-related findings, record only the file path, line range, secret class, and sanitized context needed to explain the risk.
+12. Do not quote full offending lines when they contain tokens, keys, passwords, cookies, connection strings, private keys, or other sensitive values.
+
+## Sensitive data handling
+
+Apply these rules whenever the audit touches credentials, secrets, or other sensitive material:
+
+1. Treat any suspected secret as high-risk content that must stay redacted.
+2. Confirm the issue via read-only inspection, but never echo the literal value back to the user.
+3. Describe the finding with neutral placeholders such as `<redacted-api-key>` or `<redacted-private-key>` only when a placeholder is necessary.
+4. Prefer descriptions like `hardcoded API credential in config bootstrap` over copying the surrounding source line.
+5. If a log, error, or telemetry path leaks sensitive data, describe the leaked data class and exposure path without reproducing payload contents.
+6. Keep traceability through file paths and line ranges, not through verbatim secret material.
 
 ## Mandatory analysis scope
 
@@ -35,7 +49,7 @@ Run a full technical repository audit in read-only mode and record everything in
    2. Identify long functions, mixed responsibilities, and excessive coupling.
    3. Flag confusing internal APIs, ambiguous names, and outdated comments.
 4. Security (mandatory, thorough)
-   1. Hardcoded secrets (tokens, keys, passwords, sensitive endpoints).
+   1. Hardcoded secrets (tokens, keys, passwords, sensitive endpoints), reported with redacted descriptions only.
    2. Injection vectors (SQL/NoSQL/command/template).
    3. XSS, CSRF, SSRF, open redirect, path traversal.
    4. Insecure uploads (insufficient type/size/validation checks).
@@ -185,6 +199,8 @@ Correlation notes: <related files/flows>
 Security (if applicable): <plausible abuse scenario + mitigation>
 ```
 
+For secret-related findings, keep the same structure but never include the raw secret value or paste the full source line. Use file and line references plus sanitized descriptions only.
+
 ## Detailed planning requirements
 
 The planning phase in `improvements.md` must be explicit and implementation-oriented. Use this structure:
@@ -218,6 +234,7 @@ The planning phase in `improvements.md` must be explicit and implementation-orie
 2. Avoid generic recommendations without evidence.
 3. Register all validated findings found during the audit, including low-severity and repeated-location findings.
 4. Explicitly record uncertainties when evidence is partial.
+5. For sensitive findings, preserve traceability with file and line references while keeping all credential material redacted.
 
 ## Completion criteria
 

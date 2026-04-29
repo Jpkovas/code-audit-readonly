@@ -2,6 +2,8 @@
 
 Repository ready for installation with `npx skills`.
 
+This skill performs strict read-only repository audits and now explicitly uses sub-agents to accelerate broad file-by-file review while preserving deterministic final reporting in `improvements.md`.
+
 ## Structure
 
 - `code-audit-readonly/SKILL.md`

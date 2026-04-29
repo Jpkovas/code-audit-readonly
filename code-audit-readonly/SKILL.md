@@ -16,11 +16,12 @@ Run a full technical repository audit in read-only mode and record everything in
 5. Do not ask for confirmation to proceed with the audit; execute the plan end to end.
 6. Record every validated finding; do not impose arbitrary limits.
 7. If multiple locations share the same issue pattern, still register every location with explicit file and line references.
-8. This audit is intentionally slow: prioritize depth, evidence quality, and completeness over speed.
-9. Do not optimize for fast turnaround if that reduces analysis coverage or confidence.
-10. Never reproduce secrets or raw credential material in `improvements.md`, tool output, or final responses.
-11. For secret-related findings, record only the file path, line range, secret class, and sanitized context needed to explain the risk.
-12. Do not quote full offending lines when they contain tokens, keys, passwords, cookies, connection strings, private keys, or other sensitive values.
+8. Use sub-agents to accelerate broad audits whenever the runtime supports them.
+9. Optimize for parallel throughput without reducing analysis coverage, evidence quality, or confidence.
+10. Keep one lead auditor responsible for coordination, canonical file tracking, finding deduplication, final numbering, and report synthesis.
+11. Never reproduce secrets or raw credential material in `improvements.md`, tool output, or final responses.
+12. For secret-related findings, record only the file path, line range, secret class, and sanitized context needed to explain the risk.
+13. Do not quote full offending lines when they contain tokens, keys, passwords, cookies, connection strings, private keys, or other sensitive values.
 
 ## Sensitive data handling
 
@@ -72,25 +73,66 @@ Apply these rules whenever the audit touches credentials, secrets, or other sens
 
 1. Map the repository tree and list all relevant files:
    1. Application code, internal libraries, configs, scripts, CI, Docker, IaC, migrations, and tests.
-2. Initialize `improvements.md` with:
+2. Create an audit coordination plan before reviewing individual files:
+   1. Build one canonical sorted file list owned by the lead auditor.
+   2. Split the file list into parallel work packets by domain, risk, and dependency boundaries.
+   3. Assign independent packets to sub-agents for read-only review.
+   4. Keep cross-cutting files such as authentication, authorization, routing, shared state, build scripts, deployment, and dependency manifests visible to at least one security-focused pass.
+3. Initialize `improvements.md` with:
    1. A short system summary inferred from the structure.
    2. A "Progress Tracking" section with all relevant files marked as `pending`.
    3. Severity and category conventions.
-3. Review each file sequentially and deterministically:
+4. Review files in parallel through sub-agents while preserving deterministic synthesis:
    1. Read the entire file.
    2. Record specific findings and correlate with related imports/calls/contracts.
-   3. Update progress tracking.
-   4. Explicitly record: `File fully reviewed: <path/to/file>`.
-   5. Before moving to the next file, run a quick self-check for missed edge cases, security vectors, and cross-file impacts.
-4. Run read-only auxiliary checks when useful:
+   3. Each sub-agent must return reviewed file paths, candidate findings, evidence, uncertainties, and cross-file follow-up notes.
+   4. Each sub-agent must explicitly state `File fully reviewed: <path/to/file>` for every file it completed.
+   5. The lead auditor updates progress tracking from sub-agent evidence only after checking that each file was actually read and reviewed.
+   6. Before closing a packet, run a quick self-check for missed edge cases, security vectors, and cross-file impacts.
+5. Run read-only auxiliary checks when useful:
    1. Static analysis, linter, and typecheck in read-only mode.
    2. Run tests without writing to disk.
    3. Dependency/CVE audit.
-5. Close `improvements.md` with:
+6. Run a lead-auditor synthesis pass:
+   1. Merge all sub-agent outputs into a single finding inventory.
+   2. Deduplicate only true duplicates; keep repeated-location findings when the issue occurs in multiple places.
+   3. Renumber findings sequentially after merge (`A001`, `A002`, ...).
+   4. Re-check cross-file correlations, especially where multiple sub-agents touched related flows.
+   5. Confirm no sub-agent output includes raw secrets or sensitive values.
+7. Close `improvements.md` with:
    1. A complete finding inventory (all findings captured during the audit).
    2. A prioritized backlog that references finding IDs and contains no artificial cap.
    3. A detailed phased remediation plan (see "Detailed planning requirements").
    4. A brief completeness checkpoint describing what was verified to ensure no relevant area was rushed or skipped.
+
+## Sub-agent acceleration requirements
+
+Use this model whenever more than one meaningful file or subsystem is in scope:
+
+1. Lead auditor responsibilities:
+   1. Own the canonical file list and final `improvements.md`.
+   2. Decide packet boundaries and launch sub-agents for independent read-only review.
+   3. Avoid duplicate work by giving every sub-agent an explicit file list or subsystem boundary.
+   4. Keep one dependency/security sweep that covers manifests, lockfiles, environment templates, CI, deployment, and auth-related flows.
+   5. Integrate findings, normalize severity/category, and preserve deterministic final numbering.
+2. Sub-agent packet instructions:
+   1. Stay read-only.
+   2. Review assigned files completely, not just search hits.
+   3. Include exact file and line references for every candidate finding.
+   4. Redact secrets using the sensitive data handling rules.
+   5. Return `reviewed_files`, `candidate_findings`, `cross_file_notes`, `uncertainties`, and `suggested_followups`.
+   6. Do not edit `improvements.md`; only the lead auditor writes the final report.
+3. Parallelization strategy:
+   1. Start sub-agents as soon as the canonical file list and packet boundaries are clear.
+   2. Continue local lead-auditor work while sub-agents run.
+   3. Split by natural ownership boundaries such as frontend/backend, domain modules, tests, infrastructure, data/migrations, and security-sensitive flows.
+   4. For small repositories, use at least one sub-agent for an independent security/dependency/config pass when possible.
+4. Quality gates after parallel review:
+   1. Every canonical file must have exactly one progress row.
+   2. Every canonical file must be covered by either the lead auditor or a named sub-agent packet.
+   3. Every sub-agent packet must be reconciled into the final report or explicitly marked as producing no validated findings.
+   4. Cross-file notes from sub-agents must be resolved before completion.
+   5. If sub-agents disagree, record the uncertainty or re-check the code directly before finalizing.
 
 ## Progress tracking
 

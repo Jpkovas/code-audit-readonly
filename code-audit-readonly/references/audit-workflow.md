@@ -6,9 +6,10 @@ Before reviewing individual files:
 
 1. Build one canonical sorted file list.
 2. Normalize paths by removing leading `./`, preserving disk casing, and avoiding trailing slashes.
-3. Split files into packets by domain, risk, and dependency boundaries.
-4. Assign every file to the lead auditor or a named sub-agent packet.
-5. Keep a security/dependency/config packet covering manifests, lockfiles, environment templates, CI, deployment, auth, authorization, routing, and external inputs.
+3. Infer the runtime model: deployed entrypoints, user roles, trusted boundaries, environment modes, generated code, test-only code, and local-only tooling.
+4. Split files into packets by domain, risk, and dependency boundaries.
+5. Assign every file to the lead auditor or a named sub-agent packet.
+6. Keep a security/dependency/config packet covering manifests, lockfiles, environment templates, CI, deployment, auth, authorization, routing, and external inputs.
 
 ## Sub-Agent Packet Contract
 
@@ -19,14 +20,28 @@ Stay read-only. Review only these files/subsystem boundaries completely.
 For each file, return:
 - reviewed_files
 - candidate_findings with exact file:line-line evidence
+- reachability for each candidate: actor, normal entrypoint, prerequisites, and deployed/runtime mode
 - cross_file_notes
 - uncertainties
+- rejected_candidates that looked concerning but failed the real-world finding gate
 - suggested_followups
 - File fully reviewed: <path/to/file>
 Do not edit improvements.md. Redact all secrets and credential material.
 ```
 
 The lead auditor reconciles every packet into the final report or records that the packet produced no validated findings.
+
+## Candidate Validation
+
+Before promoting any candidate to a finding:
+
+1. Trace how normal production, CI, release, admin, or documented user behavior reaches the code.
+2. Identify the actor and privilege level required before the problem occurs.
+3. Check surrounding guards, schema validation, feature flags, build steps, deployment config, and caller contracts.
+4. Confirm the impact is observable: incorrect result, security boundary failure, data loss/exposure, operational failure, measurable performance issue, or maintenance risk on an active path.
+5. Reject candidates that depend on impossible input, dead code, test fixtures, examples, disabled features, local-only scripts with no release effect, or an attacker who already has equivalent control.
+
+If the evidence is plausible but incomplete, record it as an uncertainty or follow-up instead of a numbered finding.
 
 ## Progress Tracking Rules
 

@@ -13,6 +13,7 @@ Audit the current repository without changing project code. The only project art
 - Do not run refactors, formatters, migrations, fixers, destructive commands, or commands that intentionally rewrite project files.
 - Run the audit end to end without asking for confirmation unless access, safety, or missing context blocks progress.
 - Record every validated finding with exact file and line references; do not cap or summarize away repeated locations.
+- Report only findings that are reachable in realistic project use. Do not file speculative issues that require impossible inputs, disabled code paths, already-total compromise, or behavior outside the deployed/runtime model.
 - Redact secrets and credential material everywhere. Report only path, line range, secret class, and sanitized context.
 - Use sub-agents for broad audits when available, with one lead auditor owning file tracking, synthesis, numbering, and `improvements.md`.
 
@@ -21,6 +22,7 @@ Audit the current repository without changing project code. The only project art
 Read these files as soon as the skill triggers:
 
 - [references/audit-workflow.md](references/audit-workflow.md) for the execution sequence, sub-agent packet contract, progress tracking rules, and completion checks.
+- [references/real-world-findings.md](references/real-world-findings.md) for the reachability gate, non-finding rules, severity calibration, and evidence requirements.
 - [references/report-format.md](references/report-format.md) for allowed categories, severities, finding format, and `improvements.md` structure.
 
 Read [references/review-scope.md](references/review-scope.md) while building the file list and when checking whether security, reliability, tests, dependencies, and performance coverage are complete.
@@ -32,7 +34,7 @@ Read [references/review-scope.md](references/review-scope.md) while building the
 3. Split review packets by ownership boundaries and risk. Keep auth, authorization, routing, shared state, deployment, dependency manifests, and environment/config files visible to a security-focused pass.
 4. Review files completely. Prefer parallel sub-agents where available, but keep deterministic synthesis in the lead auditor.
 5. Use read-only checks when useful: tests, typecheck, lint, static analysis, dependency/CVE audit, or grep-style evidence collection. If a check writes caches or outputs, redirect outside the audited project or skip it and record the limitation.
-6. Merge findings, deduplicate only true duplicates, preserve repeated affected locations, assign final IDs `A001`, `A002`, and so on, and verify no secret value appears in the report.
+6. Merge findings, deduplicate only true duplicates, apply the real-world finding gate, preserve repeated affected locations, assign final IDs `A001`, `A002`, and so on, and verify no secret value appears in the report.
 7. Finish only after every relevant file is marked reviewed, every reviewed file has one `File fully reviewed: <path>` line, all findings are in the backlog and phase plan, and the audited project has no changed artifact except `improvements.md`.
 
 ## Sensitive Evidence

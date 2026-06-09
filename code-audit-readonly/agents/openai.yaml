@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Audit Readonly"
-  short_description: "Read-only repository audit with one improvements.md report"
-  default_prompt: "Use $code-audit-readonly to audit this repository without changing project code. Produce one improvements.md with traceable sanitized findings, progress tracking, complete backlog, phased remediation plan, and a final confirmation that only improvements.md changed."
+  short_description: "Read-only repository audit with reachable findings in one improvements.md report"
+  default_prompt: "Use $code-audit-readonly to audit this repository without changing project code. Produce one improvements.md with realistic reachable findings, sanitized evidence, progress tracking, complete backlog, phased remediation plan, and a final confirmation that only improvements.md changed."
